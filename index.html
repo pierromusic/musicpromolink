@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PIERRO – Fille d’un ours | Nouveau single</title>
-<meta name="description" content="Nouveau single de PIERRO. Écoute et sauvegarde le single pour voir toutes les nouveautés.">
+<meta name="description" content="Fille d’un ours, le nouveau single de PIERRO. Écoute-le et sauvegarde-le sur Spotify ou Apple Music.">
 <meta name="theme-color" content="#121212">
 
 <!-- Open Graph / partage social -->
@@ -19,6 +19,9 @@
 <!-- Précharge ce qui s’affiche en premier -->
 <link rel="preload" as="image" href="poster.jpg">
 <link rel="preload" as="font" type="font/woff" href="daisy-regular.woff" crossorigin>
+
+<!-- ============ GOOGLE TAG MANAGER (GTM-P24GK2F8) ============ -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-P24GK2F8');</script>
 
 <!-- ============ META PIXEL ============ -->
 <script>
@@ -132,14 +135,15 @@ body{background:transparent}
   container-type:inline-size;           /* permet de dimensionner le titre selon la largeur disponible */
   text-shadow:0 2px 18px rgba(0,0,0,.55)
 }
-.hero .artist{display:flex;align-items:baseline;flex-wrap:wrap;gap:.2rem .8rem;margin-bottom:.1rem}
-.hero .artist b{
-  font-family:"Swarsh Daisy",Georgia,serif;font-weight:400;
-  font-size:2.35rem;line-height:1;letter-spacing:.14em;color:var(--papier);
-}
-.hero .artist span{
+/* « Nouveau single par PIERRO » : ligne au-dessus du titre (texte ambré, nom en blanc) */
+.hero .kicker{
+  display:flex;align-items:baseline;gap:.45rem;margin-bottom:.25rem;white-space:nowrap;
   font-family:"Swarsh Daisy",Georgia,serif;font-style:italic;
-  color:var(--ambre);font-size:1.2rem;
+  color:var(--ambre);font-size:1.25rem;line-height:1;
+}
+.hero .kicker b{
+  font-style:normal;font-weight:400;color:var(--papier);
+  font-size:1.45rem;letter-spacing:.12em;
 }
 /* Le titre tient toujours sur UNE ligne : sa taille suit la largeur du bloc (repli : vw) */
 .hero h1{
@@ -150,10 +154,10 @@ body{background:transparent}
 @supports (font-size:1cqw){
   .hero h1{font-size:calc(100cqw / 5.8)}   /* le titre mesure ≈ 5,44 em de large : 5,8 lui laisse une marge de ~6 % */
 }
-/* Petit paragraphe d’accroche : à modifier dans le HTML */
+/* Petit paragraphe d’accroche : 2 lignes MAXIMUM, quoi qu’on écrive (le surplus est coupé avec « … ») */
 .hero .pitch{
-  margin-top:.75rem;max-width:34ch;
-  font-size:.98rem;line-height:1.4;color:var(--papier);opacity:.92;
+  margin-top:.7rem;font-size:.95rem;line-height:1.4;color:var(--papier);opacity:.92;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;
 }
 
 /* ---------- Boutons-pilules (Thumb Zone) ---------- */
@@ -226,16 +230,19 @@ body{background:transparent}
 }
 /* Petits écrans en hauteur (iPhone SE, navigateurs in-app avec barres) */
 @media (max-height:640px){
-  .hero .artist b{font-size:2rem}
   .cta{min-height:56px}.cta-apple{min-height:56px}
   .cta small{display:none}
 }
+/* Très petits écrans (320 px) : on resserre les boutons pour que le texte ne touche pas le cœur */
+@media (max-width:340px){.cta{gap:.55rem;padding-left:.9rem;padding-right:.9rem}.cta strong{font-size:.88rem}}
 /* Très petite hauteur (navigateur intégré avec barres) : on masque l’accroche pour garder les boutons visibles */
 @media (max-height:560px){.hero .pitch{display:none}}
 </style>
 </head>
 
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24GK2F8" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- Vidéo de fond : démarre muette (autoplay autorisé partout), le son est débloqué par le JS -->
 <video id="bg" class="bg" autoplay muted loop playsinline webkit-playsinline preload="auto"
        poster="poster.jpg" disablepictureinpicture aria-hidden="true">
@@ -252,14 +259,15 @@ body{background:transparent}
   </button>
 
   <section class="hero">
-    <p class="artist"><b>PIERRO</b><span>Nouveau single</span></p>
+    <p class="kicker">Nouveau single par <b>PIERRO</b></p>
     <h1>Fille d’un ours</h1>
-    <!-- ✏️ Petit paragraphe d’accroche : remplace le texte ci-dessous par ta propre copie (2 phrases courtes max) -->
-    <p class="pitch">Écoute le nouveau single de PIERRO en entier et garde-le dans ta bibliothèque pour le retrouver quand tu veux.</p>
+    <!-- ✏️ Accroche : remplace le texte ci-dessous. MAXIMUM 75 caractères (espaces compris) pour tenir sur 2 lignes
+         sur tous les téléphones. Au-delà, le texte est coupé automatiquement avec « … ». -->
+    <p class="pitch">Écoute le nouveau single de PIERRO et garde-le dans ta bibliothèque.</p>
   </section>
 
   <nav class="ctas" aria-label="Écouter le single">
-    <a id="cta-spotify" class="cta cta-spotify" data-platform="spotify" rel="noopener" aria-label="Écouter et sauvegarder sur Spotify"
+    <a id="cta-spotify" class="cta cta-spotify" data-platform="spotify" data-cta-id="cta_spotify" rel="noopener" aria-label="Écouter et sauvegarder sur Spotify"
        href="https://open.spotify.com/album/0K1JoEmz8r1vlkuZCuCazE?go=1&amp;utm_source=Original_Original&amp;utm_medium=Original&amp;utm_content=d29957b6-70a6-4b1c-a03c-d04b5c7a2b4a_none_PIERRO_none_Fille+d%27un+ours_none_20260621_https%3A%2F%2Fwww.google.com%2F_prod_CA_artists.landr.com%2Ffille-dun-ours&amp;nd=1&amp;dlsi=3c70309f82d440de">
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="currentColor"/><g fill="none" stroke="#1DB954" stroke-linecap="round"><path d="M5.3 8.9c4.4-1.3 9.6-.9 13.5 1.4" stroke-width="2.1"/><path d="M6.2 12.5c3.8-1.1 8-.7 11.2 1.2" stroke-width="1.8"/><path d="M7.1 15.9c3.2-.8 6.5-.5 9.1 1" stroke-width="1.5"/></g></svg>
       <span class="txt">
@@ -272,9 +280,9 @@ body{background:transparent}
       </span>
     </a>
 
-    <a id="cta-apple" class="cta cta-apple" data-platform="apple_music" rel="noopener" aria-label="Écouter et ajouter à ma bibliothèque Apple Music"
+    <a id="cta-apple-music" class="cta cta-apple" data-platform="apple_music" data-cta-id="cta_apple_music" rel="noopener" aria-label="Écouter et ajouter à ma bibliothèque Apple Music"
        href="https://music.apple.com/ca/album/6782691680?app=music&amp;at=1l3vpUI&amp;ct=LFV_0fededfa73ba7e0fe3d00c22e008c312&amp;itscg=30440&amp;itsct=catchall_p1&amp;lId=216370511&amp;cId=none&amp;sr=1&amp;src=Linkfire&amp;ls=1">
-      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
       <span class="txt">
         <strong>Écouter &amp; ajouter</strong>
         <small>Ajouter à ma bibliothèque</small>
@@ -295,6 +303,8 @@ body{background:transparent}
     title: 'Fille d\u2019un ours',
     startAt: null,        // timecode (secondes) où repartir au déblocage du son. null = on ne touche pas, le son
                           // se synchronise avec l’image en cours (recommandé pour la continuité avec la pub).
+    ga4Direct: true,      // true = GA4 reçoit aussi les événements directement (gtag). Mets false quand tes balises GTM envoient
+                          // déjà ces événements à GA4, sinon ils seraient comptés deux fois.
     redirectDelay: 180,   // ms laissées au Pixel / GA4 avant de quitter la page (150–200)
     listenMs: 10000,      // événement « écoute 10 s » une fois le son activé
     spotify: {
@@ -307,7 +317,16 @@ body{background:transparent}
      OUTILS : tracking (ne plante jamais si un script est bloqué)
      ===================================================================== */
   function fb(kind, name, params) { try { window.fbq && window.fbq(kind, name, params || {}); } catch (e) {} }
-  function ga(name, params) { try { window.gtag && window.gtag('event', name, params || {}); } catch (e) {} }
+  // Envoie un événement à : (1) GTM via le dataLayer, (2) GA4 en direct si CFG.ga4Direct = true
+  function ga(name, params) {
+    params = params || {};
+    try {
+      var o = { event: name };
+      for (var k in params) { if (Object.prototype.hasOwnProperty.call(params, k)) o[k] = params[k]; }
+      (window.dataLayer = window.dataLayer || []).push(o);
+    } catch (e) {}
+    if (CFG.ga4Direct) { try { window.gtag && window.gtag('event', name, params); } catch (e) {} }
+  }
 
   var ua = navigator.userAgent || '';
   var isAndroid = /Android/i.test(ua);
@@ -451,7 +470,15 @@ body{background:transparent}
     var data = { content_name: CFG.title, platform: platform };
     fb('track', 'Lead', data);
     fb('trackCustom', platform === 'spotify' ? 'ClickSpotify' : 'ClickAppleMusic', data);
-    ga('click_streaming', { platform: platform, link_url: url, content_name: CFG.title, audio_on: soundIsOn() });
+    // Événement GTM / GA4 : « cta_click ». cta_id différencie les deux boutons : cta_spotify | cta_apple_music
+    ga('cta_click', {
+      cta_id: a.getAttribute('data-cta-id'),
+      cta_platform: platform,
+      cta_label: (a.querySelector('strong') || {}).textContent || '',
+      link_url: url,
+      content_name: CFG.title,
+      audio_on: soundIsOn()
+    });
 
     // Délai pour que les pixels partent avant de quitter la page
     setTimeout(function () { openTarget(platform, url); }, CFG.redirectDelay);
@@ -459,7 +486,7 @@ body{background:transparent}
     // Si l’utilisateur revient sur la page (bouton retour), on remet les boutons à zéro
     setTimeout(function () { busy = false; a.classList.remove('is-saved', 'is-pressed'); }, 2500);
   }
-  ['cta-spotify', 'cta-apple'].forEach(function (id) {
+  ['cta-spotify', 'cta-apple-music'].forEach(function (id) {
     document.getElementById(id).addEventListener('click', onCta);
   });
   // Page restaurée depuis le cache (retour arrière sur iOS) : état propre
