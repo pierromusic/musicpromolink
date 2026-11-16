@@ -51,7 +51,10 @@ src="https://www.facebook.com/tr?id=282532930990770&ev=PageView&noscript=1"
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'G-8H43J526WC', { transport_type: 'beacon' });
+// Ajoute ?debug=1 à l'adresse de la page pour voir tes clics dans GA4 > DebugView (sans passer par l'aperçu GTM)
+var __ga4cfg = { transport_type: 'beacon' };
+if (/[?&]debug\b/.test(location.search)) { __ga4cfg.debug_mode = true; }
+gtag('config', 'G-8H43J526WC', __ga4cfg);
 </script>
 
 <style>
@@ -324,9 +327,9 @@ body{background:transparent}
     events: { spotify: 'click_spotify', apple_music: 'click_apple_music' },
     newTab: true,         // true = le lien s’ouvre dans un NOUVEL onglet (target="_blank") : la page reste ouverte, donc GA4 / Pixel ont tout le temps d’enregistrer
                           // le clic. false = ancien comportement (même onglet, avec le délai redirectDelay).
-    ga4Direct: false,      // false = les événements passent par GTM seulement (réglage actuel). true = ils vont aussi directement
-                          // à GA4 : ne le mets à true que si tu n’as PAS de balises GTM pour eux, sinon double comptage.
-    redirectDelay: 800,   // ms laissées au Pixel / GA4 avant de quitter la page (150–200). L’animation « + → crochet »
+    ga4Direct: true,      // true (réglage actuel) = les événements vont directement à GA4, sans dépendre des balises GTM.
+                          // Garde alors tes balises d’événements GTM en pause, sinon chaque clic serait compté deux fois.
+    redirectDelay: 200,   // ms laissées au Pixel / GA4 avant de quitter la page (150–200). L’animation « + → crochet »
                           // se termine en ~160 ms ; si tu veux la voir plus longtemps, monte à 400 (au prix d’un clic un peu plus lent).
     listenMs: 10000,      // événement « écoute 10 s » une fois le son activé
     spotify: {
@@ -338,16 +341,25 @@ body{background:transparent}
   /* =====================================================================
      OUTILS : tracking (ne plante jamais si un script est bloqué)
      ===================================================================== */
-  function fb(kind, name, params) { try { window.fbq && window.fbq(kind, name, params || {}); } catch (e) {} }
-  // Envoie un événement à : (1) GTM via le dataLayer, (2) GA4 en direct si CFG.ga4Direct = true
-  function ga(name, params) {
+  // Mode diagnostic : ouvre la page avec ?debug=1 puis la console (Cmd+Option+J) pour voir chaque envoi
+  var DEBUG = /[?&]debug\b/.test(location.search);
+  function log() { if (DEBUG && window.console) { console.log.apply(console, ['[PIERRO]'].concat([].slice.call(arguments))); } }
+
+  function fb(kind, name, params) {
+    try { window.fbq && window.fbq(kind, name, params || {}); log('Meta Pixel →', kind, name); } catch (e) {}
+  }
+  // Envoie un événement à : (1) GTM via le dataLayer, (2) GA4 en direct si CFG.ga4Direct = true.
+  // onDone (facultatif) est appelé quand GTM a terminé de déclencher ses balises pour cet événement.
+  function ga(name, params, onDone) {
     params = params || {};
     try {
       var o = { event: name };
       for (var k in params) { if (Object.prototype.hasOwnProperty.call(params, k)) o[k] = params[k]; }
+      if (onDone) { o.eventCallback = onDone; o.eventTimeout = 1500; }
       (window.dataLayer = window.dataLayer || []).push(o);
-    } catch (e) {}
-    if (CFG.ga4Direct) { try { window.gtag && window.gtag('event', name, params); } catch (e) {} }
+      log('dataLayer.push →', name, params, '| GTM chargé :', !!window.google_tag_manager);
+    } catch (e) { if (onDone) onDone(); }
+    if (CFG.ga4Direct) { try { window.gtag && window.gtag('event', name, params); log('gtag direct →', name); } catch (e) {} }
   }
 
   var ua = navigator.userAgent || '';
@@ -496,6 +508,11 @@ body{background:transparent}
     fb('track', 'Lead', data);
     fb('trackCustom', platform === 'spotify' ? 'ClickSpotify' : 'ClickAppleMusic', data);
     // Un événement par bouton, avec son propre nom : click_spotify  |  click_apple_music (pas besoin de variable dans GTM)
+    var delayDone = false, tagsDone = !(window.google_tag_manager) || newTab, went = false;
+    function tryGo() {
+      if (newTab || went || !delayDone || !tagsDone) return;
+      went = true; log('ouverture →', platform, url.slice(0, 60)); openTarget(platform, url);
+    }
     ga(CFG.events[platform], {
       cta_id: a.getAttribute('data-cta-id'),
       cta_platform: platform,
@@ -503,11 +520,14 @@ body{background:transparent}
       link_url: url,
       content_name: CFG.title,
       audio_on: soundIsOn()
-    });
+    }, newTab ? null : function () { tagsDone = true; tryGo(); });
 
-    // Même onglet : on laisse un court délai aux pixels avant de quitter la page.
+    // Même onglet : on part après redirectDelay ET après la fin des balises GTM (sécurité : 1,5 s max).
     // Nouvel onglet : rien à faire, la page reste ouverte pendant que Spotify / Apple Music s’ouvre.
-    if (!newTab) setTimeout(function () { openTarget(platform, url); }, CFG.redirectDelay);
+    if (!newTab) {
+      setTimeout(function () { delayDone = true; tryGo(); }, CFG.redirectDelay);
+      setTimeout(function () { tagsDone = true; tryGo(); }, 1500);
+    } else { log('nouvel onglet (target=_blank) :', platform); }
 
     // Si l’utilisateur revient sur la page (bouton retour), on remet les boutons à zéro
     setTimeout(function () { busy = false; a.classList.remove('is-saved', 'is-pressed'); }, 2500);
