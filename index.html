@@ -282,7 +282,7 @@ body{background:transparent}
   </section>
 
   <nav class="ctas" aria-label="Écouter le single">
-    <a id="cta-spotify" class="cta cta-spotify" data-platform="spotify" data-cta-id="cta_spotify" target="_blank" rel="noopener" aria-label="Écouter et sauvegarder sur Spotify"
+    <a id="cta-spotify" class="cta cta-spotify" data-platform="spotify" data-cta-id="cta_spotify" rel="noopener" aria-label="Écouter et sauvegarder sur Spotify"
        href="https://open.spotify.com/album/0K1JoEmz8r1vlkuZCuCazE?go=1&amp;utm_source=Original_Original&amp;utm_medium=Original&amp;utm_content=d29957b6-70a6-4b1c-a03c-d04b5c7a2b4a_none_PIERRO_none_Fille+d%27un+ours_none_20260621_https%3A%2F%2Fwww.google.com%2F_prod_CA_artists.landr.com%2Ffille-dun-ours&amp;nd=1&amp;dlsi=3c70309f82d440de">
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="currentColor"/><g fill="none" stroke="#1DB954" stroke-linecap="round"><path d="M5.3 8.9c4.4-1.3 9.6-.9 13.5 1.4" stroke-width="2.1"/><path d="M6.2 12.5c3.8-1.1 8-.7 11.2 1.2" stroke-width="1.8"/><path d="M7.1 15.9c3.2-.8 6.5-.5 9.1 1" stroke-width="1.5"/></g></svg>
       <span class="txt">
@@ -299,7 +299,7 @@ body{background:transparent}
       </span>
     </a>
 
-    <a id="cta-apple-music" class="cta cta-apple" data-platform="apple_music" data-cta-id="cta_apple_music" target="_blank" rel="noopener" aria-label="Écouter et ajouter à ma bibliothèque Apple Music"
+    <a id="cta-apple-music" class="cta cta-apple" data-platform="apple_music" data-cta-id="cta_apple_music" rel="noopener" aria-label="Écouter et ajouter à ma bibliothèque Apple Music"
        href="https://music.apple.com/ca/album/6782691680?app=music&amp;at=1l3vpUI&amp;ct=LFV_0fededfa73ba7e0fe3d00c22e008c312&amp;itscg=30440&amp;itsct=catchall_p1&amp;lId=216370511&amp;cId=none&amp;sr=1&amp;src=Linkfire&amp;ls=1">
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
       <span class="txt">
@@ -325,11 +325,11 @@ body{background:transparent}
     // Noms des événements envoyés à GTM (un par bouton). Ils doivent être IDENTIQUES au « Nom de l’événement »
     // de tes déclencheurs « Événement personnalisé » dans GTM. Change-les ici si tes déclencheurs portent d’autres noms.
     events: { spotify: 'click_spotify', apple_music: 'click_apple_music' },
-    newTab: true,         // true = le lien s’ouvre dans un NOUVEL onglet (target="_blank") : la page reste ouverte, donc GA4 / Pixel ont tout le temps d’enregistrer
+    newTab: false,         // true = le lien s’ouvre dans un NOUVEL onglet (target="_blank") : la page reste ouverte, donc GA4 / Pixel ont tout le temps d’enregistrer
                           // le clic. false = ancien comportement (même onglet, avec le délai redirectDelay).
     ga4Direct: true,      // true (réglage actuel) = les événements vont directement à GA4, sans dépendre des balises GTM.
                           // Garde alors tes balises d’événements GTM en pause, sinon chaque clic serait compté deux fois.
-    redirectDelay: 200,   // ms laissées au Pixel / GA4 avant de quitter la page (150–200). L’animation « + → crochet »
+    redirectDelay: 300,   // ms laissées au Pixel / GA4 avant de quitter la page (150–200). L’animation « + → crochet »
                           // se termine en ~160 ms ; si tu veux la voir plus longtemps, monte à 400 (au prix d’un clic un peu plus lent).
     listenMs: 10000,      // événement « écoute 10 s » une fois le son activé
     spotify: {
