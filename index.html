@@ -324,7 +324,7 @@ body{background:transparent}
     events: { spotify: 'click_spotify', apple_music: 'click_apple_music' },
     ga4Direct: false,      // false = les événements passent par GTM seulement (réglage actuel). true = ils vont aussi directement
                           // à GA4 : ne le mets à true que si tu n’as PAS de balises GTM pour eux, sinon double comptage.
-    redirectDelay: 200,   // ms laissées au Pixel / GA4 avant de quitter la page (150–200). L’animation « + → crochet »
+    redirectDelay: 500,   // ms laissées au Pixel / GA4 avant de quitter la page (150–200). L’animation « + → crochet »
                           // se termine en ~160 ms ; si tu veux la voir plus longtemps, monte à 400 (au prix d’un clic un peu plus lent).
     listenMs: 10000,      // événement « écoute 10 s » une fois le son activé
     spotify: {
