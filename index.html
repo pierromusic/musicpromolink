@@ -283,7 +283,7 @@ body{background:transparent}
 
   <nav class="ctas" aria-label="Écouter le single">
     <a id="cta-spotify" class="cta cta-spotify" data-platform="spotify" data-cta-id="cta_spotify" rel="noopener" aria-label="Écouter et sauvegarder sur Spotify"
-       href="https://open.spotify.com/album/0K1JoEmz8r1vlkuZCuCazE?go=1&amp;utm_source=Original_Original&amp;utm_medium=Original&amp;utm_content=d29957b6-70a6-4b1c-a03c-d04b5c7a2b4a_none_PIERRO_none_Fille+d%27un+ours_none_20260621_https%3A%2F%2Fwww.google.com%2F_prod_CA_artists.landr.com%2Ffille-dun-ours&amp;nd=1&amp;dlsi=3c70309f82d440de">
+       href="https://open.spotify.com/album/0K1JoEmz8r1vlkuZCuCazE?si=XaJ4tmxnR96honAU3i1xbg">
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="currentColor"/><g fill="none" stroke="#1DB954" stroke-linecap="round"><path d="M5.3 8.9c4.4-1.3 9.6-.9 13.5 1.4" stroke-width="2.1"/><path d="M6.2 12.5c3.8-1.1 8-.7 11.2 1.2" stroke-width="1.8"/><path d="M7.1 15.9c3.2-.8 6.5-.5 9.1 1" stroke-width="1.5"/></g></svg>
       <span class="txt">
         <strong>Écouter &amp; sauvegarder</strong>
@@ -325,7 +325,7 @@ body{background:transparent}
     // Noms des événements envoyés à GTM (un par bouton). Ils doivent être IDENTIQUES au « Nom de l’événement »
     // de tes déclencheurs « Événement personnalisé » dans GTM. Change-les ici si tes déclencheurs portent d’autres noms.
     events: { spotify: 'click_spotify', apple_music: 'click_apple_music' },
-    inAppNative: true,    // true = dans Instagram / Facebook, on tente d’ouvrir directement l’appli (spotify: / music:). Si tu vois une erreur de redirection là-bas,
+    inAppNative: false,    // true = dans Instagram / Facebook, on tente d’ouvrir directement l’appli (spotify: / music:). Si tu vois une erreur de redirection là-bas,
                           // mets false : le lien https normal est alors utilisé partout, sans tentative d’appli.
     newTab: false,         // true = le lien s’ouvre dans un NOUVEL onglet (target="_blank") : la page reste ouverte, donc GA4 / Pixel ont tout le temps d’enregistrer
                           // le clic. false = ancien comportement (même onglet, avec le délai redirectDelay).
