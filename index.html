@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PIERRO – Fille d’un ours | Nouveau single</title>
-<meta name="description" content="Fille d’un ours, le nouveau single de PIERRO. Découvre le folk boréal de PIERRO sur Spotify ou Apple Music.">
+<meta name="description" content="Fille d’un ours, le nouveau single de PIERRO. Écoute-le et sauvegarde-le sur Spotify ou Apple Music.">
 <meta name="theme-color" content="#121212">
 
 <!-- Favicon : monogramme « P » (Swarsh Daisy). Fichiers à placer à côté de index.html -->
@@ -278,7 +278,7 @@ body{background:transparent}
     <h1>Fille d’un ours</h1>
     <!-- ✏️ Accroche : remplace le texte ci-dessous. MAXIMUM 75 caractères (espaces compris) pour tenir sur 2 lignes
          sur tous les téléphones. Au-delà, le texte est coupé automatiquement avec « … ». -->
-    <p class="pitch">Découvre le Folk Boréal de PIERRO sur Spotify et Apple Music.</p>
+    <p class="pitch">Écoute le nouveau single de PIERRO et garde-le dans ta bibliothèque.</p>
   </section>
 
   <nav class="ctas" aria-label="Écouter le single">
@@ -287,7 +287,7 @@ body{background:transparent}
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="currentColor"/><g fill="none" stroke="#1DB954" stroke-linecap="round"><path d="M5.3 8.9c4.4-1.3 9.6-.9 13.5 1.4" stroke-width="2.1"/><path d="M6.2 12.5c3.8-1.1 8-.7 11.2 1.2" stroke-width="1.8"/><path d="M7.1 15.9c3.2-.8 6.5-.5 9.1 1" stroke-width="1.5"/></g></svg>
       <span class="txt">
         <strong>Écouter &amp; sauvegarder</strong>
-        <small>Touche le + pour sauvegarder</small>
+        <small>Touche le + pour le garder</small>
       </span>
       <span class="save" aria-hidden="true">
         <svg viewBox="0 0 24 24">
@@ -325,6 +325,8 @@ body{background:transparent}
     // Noms des événements envoyés à GTM (un par bouton). Ils doivent être IDENTIQUES au « Nom de l’événement »
     // de tes déclencheurs « Événement personnalisé » dans GTM. Change-les ici si tes déclencheurs portent d’autres noms.
     events: { spotify: 'click_spotify', apple_music: 'click_apple_music' },
+    inAppNative: true,    // true = dans Instagram / Facebook, on tente d’ouvrir directement l’appli (spotify: / music:). Si tu vois une erreur de redirection là-bas,
+                          // mets false : le lien https normal est alors utilisé partout, sans tentative d’appli.
     newTab: false,         // true = le lien s’ouvre dans un NOUVEL onglet (target="_blank") : la page reste ouverte, donc GA4 / Pixel ont tout le temps d’enregistrer
                           // le clic. false = ancien comportement (même onglet, avec le délai redirectDelay).
     ga4Direct: true,      // true (réglage actuel) = les événements vont directement à GA4, sans dépendre des balises GTM.
@@ -469,7 +471,7 @@ body{background:transparent}
     // Par défaut : le lien https (lien universel), qui ouvre l’appli quand l’OS le permet.
     // Dans les navigateurs intégrés Instagram / Facebook, les liens universels sont souvent bloqués :
     // on tente alors le schéma natif, avec repli automatique sur le lien https.
-    if (inMetaApp) {
+    if (inMetaApp && CFG.inAppNative) {
       if (platform === 'spotify' && isAndroid) {
         location.href = CFG.spotify.android + encodeURIComponent(webUrl) + ';end';
         return;
@@ -486,12 +488,17 @@ body{background:transparent}
     location.href = nativeUrl;
   }
 
+  // Sécurité : dans le navigateur d’Instagram / Facebook, un target="_blank" provoque des erreurs de redirection : on le retire.
+  if (inMetaApp) {
+    [].forEach.call(document.querySelectorAll('a.cta'), function (c) { c.removeAttribute('target'); });
+  }
+
   var busy = false;
   function onCta(e) {
     var a = e.currentTarget, platform = a.getAttribute('data-platform'), url = a.href;
     // Dans les navigateurs Instagram / Facebook, on garde l’ouverture « appli native » (même onglet) ; sinon : nouvel onglet.
-    var wantsNative = inMetaApp && ((platform === 'spotify' && (isAndroid || isIOS)) || (platform === 'apple_music' && isIOS));
-    var newTab = CFG.newTab && !wantsNative;
+    var wantsNative = CFG.inAppNative && inMetaApp && ((platform === 'spotify' && (isAndroid || isIOS)) || (platform === 'apple_music' && isIOS));
+    var newTab = CFG.newTab && !wantsNative && !inMetaApp;   // jamais de nouvel onglet dans le navigateur d’Instagram / Facebook
     if (busy) { e.preventDefault(); return; }      // évite un double clic = deux onglets
     if (!newTab) e.preventDefault();               // sinon le navigateur ouvre le lien (target=_blank) tout seul, immédiatement
     busy = true;
