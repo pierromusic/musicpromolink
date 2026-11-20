@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- ============ A/B TEST : redirection 50/50 (doit rester le PREMIER script de la page) ============ -->
+<script>
+(function () {
+  /* ---------- RÉGLAGES DU TEST ---------- */
+  var AB = {
+    enabled: true,            // false = test arrêté : tout le monde voit la version A
+    test: 'copy_test_v1',     // nom du test, envoyé à GA4 (paramètre ab_test). Change-le pour relancer un nouveau test.
+    split: 0.5,               // part du trafic envoyée vers la version B (0.5 = 50 / 50)
+    control: './',            // adresse de la version A (cette page, dans index.html)
+    variant: 'variant-b.html',// adresse de la version B
+    days: 30                  // un visiteur garde la même version pendant 30 jours
+  };
+  var ROLE = 'variant';      // 'control' dans index.html (version A), 'variant' dans variant-b.html (version B)
+
+  /* ---------- LOGIQUE (rien à modifier) ---------- */
+  var key = 'pierro_ab_' + AB.test, q = location.search;
+  var dir = location.pathname.replace(/[^\/]*$/, '') || '/';
+  function qp(n) { var m = new RegExp('[?&]' + n + '=([^&#]*)', 'i').exec(q); return m ? decodeURIComponent(m[1]) : null; }
+  function read() {
+    try { var v = localStorage.getItem(key); if (v) return v; } catch (e) {}
+    var m = document.cookie.match(new RegExp('(?:^|; )' + key + '=([^;]*)')); return m ? m[1] : null;
+  }
+  function write(v) {
+    try { localStorage.setItem(key, v); } catch (e) {}
+    try { document.cookie = key + '=' + v + '; max-age=' + (AB.days * 86400) + '; path=' + dir + '; SameSite=Lax'; } catch (e) {}
+  }
+  var force = qp('ab'), v = null, forced = false, persist = true;
+  if (force) {            // aperçu / test manuel : ?ab=A  ?ab=B  ?ab=off
+    force = force.toUpperCase();
+    if (force === 'A' || force === 'B') { v = force; forced = true; }
+    else if (force === 'OFF') { v = 'A'; forced = true; persist = false; }
+  }
+  var stored = read(); if (stored !== 'A' && stored !== 'B') stored = null;
+  if (!v) {
+    if (ROLE === 'variant') { v = 'B'; }                          // arrivé directement sur B : il voit B
+    else if (!AB.enabled) { v = 'A'; persist = false; }           // test arrêté
+    else { v = stored || (Math.random() < AB.split ? 'B' : 'A'); } // 1re visite : tirage au sort 50/50
+  }
+  if (persist && (forced || !stored)) write(v);
+
+  window.__AB = { test: AB.test, variant: v, forced: forced, role: ROLE };
+
+  var target = null;
+  if (ROLE === 'control' && v === 'B') target = AB.variant;
+  if (ROLE === 'variant' && v === 'A') target = AB.control;      // seulement avec ?ab=A (aperçu)
+  if (target) {
+    window.__abRedirecting = true;                               // bloque GTM / Pixel / GA4 sur cette page : la visite est comptée sur la bonne version
+    document.documentElement.style.visibility = 'hidden';        // évite un flash de la mauvaise version
+    var url = target + q + location.hash;                        // conserve utm_*, fbclid, etc.
+    try { location.replace(url); } catch (e) { location.href = url; }
+    setTimeout(function () { document.documentElement.style.visibility = ''; }, 3000); // sécurité si la redirection échoue
+  }
+})();
+</script>
+<title>PIERRO – Fille d’un ours | Nouveau single</title>
+<meta name="description" content="Fille d’un ours, le nouveau single de PIERRO. Écoute-le et sauvegarde-le sur Spotify ou Apple Music.">
+<meta name="theme-color" content="#121212">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://pierromusic.github.io/musicpromolink/">
+
+<!-- Favicon : monogramme « P » (Swarsh Daisy). Fichiers à placer à côté de index.html -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Open Graph / partage social -->
+<meta property="og:type" content="music.song">
+<meta property="og:locale" content="fr_CA">
+<meta property="og:title" content="PIERRO – Fille d’un ours">
+<meta property="og:description" content="Le nouveau single de PIERRO. Écoute-le et sauvegarde-le.">
+<meta property="og:image" content="https://pierromusic.github.io/musicpromolink/og.jpg">
+<meta property="og:url" content="https://pierromusic.github.io/musicpromolink/">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Précharge ce qui s’affiche en premier -->
+<link rel="preload" as="image" href="poster.jpg">
+<link rel="preload" as="font" type="font/woff" href="daisy-regular.woff" crossorigin>
+
+<!-- ============ GOOGLE TAG MANAGER (GTM-P24GK2F8) ============ -->
+<script>if(!window.__abRedirecting)(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-P24GK2F8');</script>
+
+<!-- ============ META PIXEL ============ -->
+<script>
+if(!window.__abRedirecting){
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '282532930990770');
+fbq('track', 'PageView');
+}
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=282532930990770&ev=PageView&noscript=1"
+/></noscript>
+
+<!-- ============ GOOGLE ANALYTICS 4 ============ -->
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+if (!window.__abRedirecting) {
+  var __gs = document.createElement('script'); __gs.async = true;
+  __gs.src = 'https://www.googletagmanager.com/gtag/js?id=G-8H43J526WC';
+  document.head.appendChild(__gs);
+  gtag('js', new Date());
+  // Ajoute ?debug=1 à l'adresse de la page pour voir tes clics dans GA4 > DebugView (sans passer par l'aperçu GTM)
+  var __ga4cfg = { transport_type: 'beacon' };
+  if (/[?&]debug\b/.test(location.search)) { __ga4cfg.debug_mode = true; }
+  // A/B : chaque événement GA4 porte ab_test et ab_variant (à enregistrer comme dimensions personnalisées dans GA4)
+  if (window.__AB) {
+    __ga4cfg.ab_test = __AB.test; __ga4cfg.ab_variant = __AB.variant;
+    if (__AB.forced) { __ga4cfg.ab_forced = 'yes'; }
+  }
+  gtag('config', 'G-8H43J526WC', __ga4cfg);
+}
+</script>
+
+<style>
+/* ---------- Polices (titres : Swarsh Daisy, sous-ensemble latin + accents) ---------- */
+@font-face{font-family:"Swarsh Daisy";src:url("daisy-regular.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Swarsh Daisy";src:url("daisy-italic.woff") format("woff");font-weight:400;font-style:italic;font-display:swap}
+
+/* ---------- Palette (celle du site PIERRO) ---------- */
+:root{
+  --charbon:#121212;
+  --brique:#8B0000;
+  --ambre:#D4A373;
+  --papier:#F4F4F4;
+  --spotify:#1DB954;
+  --apple:#FA243C;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  height:100%;
+  background:var(--charbon);
+  color:var(--papier);
+  overflow:hidden;                       /* aucune barre de défilement parasite */
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-text-size-adjust:100%;
+}
+/* Le fond du <body> doit être transparent, sinon il recouvre la vidéo (z-index négatif) */
+body{background:transparent}
+
+/* ---------- Vidéo plein écran (fond) ---------- */
+.bg{
+  position:fixed;inset:0;z-index:1;
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  background:var(--charbon) url("poster.jpg") center/cover no-repeat;
+}
+/* Voile pour garder le texte lisible, plus dense en bas (zone des boutons) */
+.scrim{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgba(18,18,18,.55) 0%, rgba(18,18,18,0) 22%,
+    rgba(18,18,18,0) 42%, rgba(18,18,18,.62) 68%, rgba(18,18,18,.94) 100%);
+}
+/* Grain 35 mm, statique donc gratuit pour le processeur */
+.grain{
+  position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ---------- Mise en page : une seule colonne, hauteur dynamique ---------- */
+.stage{
+  position:fixed;inset:0;z-index:4;
+  height:100vh;height:100dvh;            /* 100dvh avec repli 100vh */
+  display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;
+  padding:calc(var(--safe-t) + 14px) 20px calc(var(--safe-b) + 18px);
+  max-width:520px;margin:0 auto;
+}
+
+/* ---------- Indicateur de son ---------- */
+.sound{
+  align-self:center;
+  display:inline-flex;align-items:center;gap:.55rem;
+  padding:.55rem 1rem;border:0;border-radius:9999px;
+  background:rgba(18,18,18,.58);color:var(--papier);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font:inherit;font-size:.86rem;line-height:1;cursor:pointer;
+  transition:background .25s;
+}
+.sound .eq{display:inline-flex;align-items:flex-end;gap:2px;height:12px;width:14px}
+.sound .eq i{flex:1;background:var(--ambre);height:30%;border-radius:1px}
+.sound.is-on .eq i{animation:eq 900ms ease-in-out infinite}
+.sound.is-on .eq i:nth-child(2){animation-delay:-300ms}
+.sound.is-on .eq i:nth-child(3){animation-delay:-600ms}
+.sound:not(.is-on):not(.is-muted) .eq i{animation:none;height:100%;background:var(--papier)}
+.sound.is-muted .eq i{animation:none;height:25%;background:#888}
+.sound.is-hint{animation:hint 1800ms ease-in-out infinite}
+@keyframes eq{0%,100%{height:25%}50%{height:100%}}
+@keyframes hint{0%,100%{background:rgba(18,18,18,.58)}50%{background:rgba(139,0,0,.75)}}
+
+/* ---------- Titre ---------- */
+.hero{
+  margin-top:auto;padding-bottom:1.3rem;
+  container-type:inline-size;           /* permet de dimensionner le titre selon la largeur disponible */
+  text-shadow:0 2px 18px rgba(0,0,0,.55)
+}
+/* « Nouveau single par PIERRO » : ligne au-dessus du titre (texte ambré, nom en blanc) */
+.hero .kicker{
+  display:flex;align-items:baseline;gap:.45rem;margin-bottom:.25rem;white-space:nowrap;
+  font-family:"Swarsh Daisy",Georgia,serif;font-style:italic;
+  color:var(--ambre);font-size:1.25rem;line-height:1;
+}
+.hero .kicker b{
+  font-style:normal;font-weight:400;color:var(--papier);
+  font-size:1.45rem;letter-spacing:.12em;
+}
+/* Le titre tient toujours sur UNE ligne : sa taille suit la largeur du bloc (repli : vw) */
+.hero h1{
+  font-family:"Swarsh Daisy",Georgia,serif;font-weight:400;
+  font-size:clamp(1.7rem,calc((100vw - 40px) / 5.8),3.4rem);
+  line-height:1;letter-spacing:.005em;white-space:nowrap;
+}
+@supports (font-size:1cqw){
+  .hero h1{font-size:calc(100cqw / 5.8)}   /* le titre mesure ≈ 5,44 em de large : 5,8 lui laisse une marge de ~6 % */
+}
+/* Petit paragraphe d’accroche : 2 lignes MAXIMUM, quoi qu’on écrive (le surplus est coupé avec « … ») */
+.hero .pitch{
+  margin-top:.7rem;font-size:.95rem;line-height:1.4;color:var(--papier);opacity:.92;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;
+}
+
+/* ---------- Boutons-pilules (Thumb Zone) ---------- */
+.ctas{display:flex;flex-direction:column;gap:12px}
+.cta{
+  position:relative;overflow:hidden;
+  display:grid;grid-template-columns:30px 1fr 30px;align-items:center;gap:.85rem;
+  min-height:64px;padding:.75rem 1.2rem .75rem 1.3rem;
+  border-radius:9999px;text-decoration:none;
+  transition:transform .12s ease,box-shadow .2s ease;
+  touch-action:manipulation;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+.cta:active{transform:scale(.97)}
+.cta:focus-visible{outline:3px solid var(--papier);outline-offset:3px}
+.cta .txt{display:flex;flex-direction:column;text-align:left;line-height:1.15;min-width:0}
+.cta .logo{width:30px;height:30px;display:block}
+.cta strong{font-size:clamp(.95rem,4.4vw,1.1rem);font-weight:800;letter-spacing:-.005em;white-space:nowrap}
+.cta small{font-size:.8rem;margin-top:.18rem;font-weight:500;white-space:nowrap}
+
+.cta-spotify{background:var(--spotify);color:var(--charbon)}
+.cta-spotify small{opacity:.82}
+.cta-apple{background:var(--apple);color:#fff;min-height:58px}
+.cta-apple small{opacity:.92}
+
+/* Effet d’onde au toucher (micro-interaction) */
+.cta::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(circle at var(--px,50%) var(--py,50%),rgba(255,255,255,.55) 0,rgba(255,255,255,0) 60%);
+  opacity:0;transform:scale(.4);
+}
+.cta.is-pressed::after{animation:ripple 520ms ease-out}
+@keyframes ripple{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(1.6)}}
+
+/* ---------- Icône de sauvegarde (comme Spotify) : cercle avec « + » qui devient un crochet ---------- */
+.save{position:relative;flex:none;width:30px;height:30px;display:grid;place-items:center}
+.save svg{width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;animation:beat 2600ms ease-in-out infinite;transform-origin:center}
+.save .c{fill:transparent}
+.save .p,.save .k{transform-box:fill-box;transform-origin:center}
+.save .k{stroke:var(--spotify);stroke-dasharray:1;stroke-dashoffset:1}   /* crochet caché (tracé à 0 %) */
+.save .ring{
+  position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--charbon);
+  opacity:0;transform:scale(.5);pointer-events:none;
+}
+/* Léger battement au repos pour attirer l’œil */
+@keyframes beat{0%,55%,100%{transform:scale(1)}65%{transform:scale(1.14)}75%{transform:scale(.97)}85%{transform:scale(1.07)}}
+/* Au clic : le cercle se remplit, le « + » tourne et disparaît, le crochet se dessine, une onde part de l’icône */
+.cta-spotify.is-saved .save svg{animation:pop 240ms cubic-bezier(.2,1.6,.4,1) both}
+.cta-spotify.is-saved .save .c{fill:var(--charbon);transition:fill .09s ease-out}
+.cta-spotify.is-saved .save .p{animation:plusOut 70ms ease-in both}
+.cta-spotify.is-saved .save .k{animation:draw 100ms 60ms ease-out both}
+.cta-spotify.is-saved .save .ring{animation:burst 380ms ease-out both}
+@keyframes plusOut{to{transform:rotate(90deg) scale(.2);opacity:0}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{0%{transform:scale(.8)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+@keyframes burst{0%{opacity:.9;transform:scale(.5)}100%{opacity:0;transform:scale(2.4)}}
+
+/* Icône « + » Apple Music */
+.plus{flex:none;width:26px;height:26px}
+.plus svg{width:100%;height:100%;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;fill:none}
+.cta-apple.is-saved .plus svg{animation:spin 420ms ease-out}
+@keyframes spin{from{transform:rotate(-90deg) scale(.6)}to{transform:none}}
+
+/* ---------- Ordinateur / écran large : la vidéo reste verticale, centrée, sans zoom ---------- */
+.side{display:none}
+@media (min-aspect-ratio:4/5){
+  .bg{left:50%;right:auto;width:calc(100vh * 9 / 16);width:calc(100dvh * 9 / 16);transform:translateX(-50%)}
+  .scrim{left:50%;right:auto;width:calc(100vh * 9 / 16);width:calc(100dvh * 9 / 16);transform:translateX(-50%)}
+  .side{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:var(--charbon) url("poster.jpg") center/cover no-repeat;
+    filter:blur(36px) brightness(.4) saturate(1.1);transform:scale(1.15)}
+  .stage{width:calc(100vh * 9 / 16);width:calc(100dvh * 9 / 16);max-width:none;min-width:360px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition:none!important}
+}
+/* Petits écrans en hauteur (iPhone SE, navigateurs in-app avec barres) */
+@media (max-height:640px){
+  .cta{min-height:56px}.cta-apple{min-height:56px}
+  .cta small{display:none}
+}
+/* Très petits écrans (320 px) : on resserre les boutons pour que le texte ne touche pas l’icône de droite */
+@media (max-width:340px){.cta{gap:.55rem;padding-left:.9rem;padding-right:.9rem}.cta strong{font-size:.88rem}}
+/* Très petite hauteur (navigateur intégré avec barres) : on masque l’accroche pour garder les boutons visibles */
+@media (max-height:560px){.hero .pitch{display:none}}
+</style>
+</head>
+
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24GK2F8" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- Vidéo de fond : démarre muette (autoplay autorisé partout), le son est débloqué par le JS -->
+<video id="bg" class="bg" autoplay muted loop playsinline webkit-playsinline preload="auto"
+       poster="poster.jpg" disablepictureinpicture aria-hidden="true">
+  <source src="promo.mp4" type="video/mp4">
+</video>
+<div class="side"></div>
+<div class="scrim"></div>
+<div class="grain"></div>
+
+<main class="stage">
+  <button id="sound" class="sound is-hint" type="button" aria-live="polite">
+    <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span id="soundTxt">Tap n’importe où pour le son</span>
+  </button>
+
+  <section class="hero">
+    <p class="kicker">Nouveau single par <b>PIERRO</b></p>
+    <!-- ✏️ VARIANTE B · 1) TITRE : modifie le texte du titre juste en dessous. Jusqu’à ~30 caractères : au-delà de ~16 il passe sur 2 lignes automatiquement. -->
+    <h1>Fille d’un ours</h1>
+    <!-- ✏️ Accroche : remplace le texte ci-dessous. MAXIMUM 75 caractères (espaces compris) pour tenir sur 2 lignes
+         sur tous les téléphones. Au-delà, le texte est coupé automatiquement avec « … ». -->
+    <!-- ✏️ VARIANTE B · 2) SOUS-TITRE : 75 caractères maximum, espaces compris (2 lignes max, le surplus est coupé). -->
+    <p class="pitch">Du nouvel album. Découvre le folk boréal unique de PIERRO et va sauvegarde sur ta plateforme</p>
+  </section>
+
+  <!-- ✏️ VARIANTE B · 3) TEXTE DES BOUTONS : le texte en gras = principal (22 caractères max), le texte en petit = secondaire (30 caractères max). -->
+  <nav class="ctas" aria-label="Écouter le single">
+    <a id="cta-spotify" class="cta cta-spotify" data-platform="spotify" data-cta-id="cta_spotify" rel="noopener" aria-label="Écouter et sauvegarder sur Spotify"
+       href="https://open.spotify.com/album/0K1JoEmz8r1vlkuZCuCazE?si=XaJ4tmxnR96honAU3i1xbg">
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="currentColor"/><g fill="none" stroke="#1DB954" stroke-linecap="round"><path d="M5.3 8.9c4.4-1.3 9.6-.9 13.5 1.4" stroke-width="2.1"/><path d="M6.2 12.5c3.8-1.1 8-.7 11.2 1.2" stroke-width="1.8"/><path d="M7.1 15.9c3.2-.8 6.5-.5 9.1 1" stroke-width="1.5"/></g></svg>
+      <span class="txt">
+        <strong>Écouter &amp; sauvegarder</strong>
+        <small>Touche le + pour sauvegarder</small>
+      </span>
+      <span class="save" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <circle class="c" cx="12" cy="12" r="10"/>
+          <path class="p" d="M12 7.5v9M7.5 12h9"/>
+          <path class="k" pathLength="1" d="M7.6 12.4l3 3 5.8-6.2"/>
+        </svg>
+        <i class="ring"></i>
+      </span>
+    </a>
+
+    <a id="cta-apple-music" class="cta cta-apple" data-platform="apple_music" data-cta-id="cta_apple_music" rel="noopener" aria-label="Écouter et ajouter à ma bibliothèque Apple Music"
+       href="https://music.apple.com/ca/album/6782691680?app=music&amp;at=1l3vpUI&amp;ct=LFV_0fededfa73ba7e0fe3d00c22e008c312&amp;itscg=30440&amp;itsct=catchall_p1&amp;lId=216370511&amp;cId=none&amp;sr=1&amp;src=Linkfire&amp;ls=1">
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+      <span class="txt">
+        <strong>Écouter &amp; ajouter</strong>
+        <small>Ajouter à ma bibliothèque</small>
+      </span>
+      <span class="plus" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+    </a>
+  </nav>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  if (window.__abRedirecting) { return; }   // page en cours de redirection vers l'autre version : on ne compte rien ici
+
+  /* =====================================================================
+     CONFIGURATION : tout ce que tu peux vouloir modifier est ici
+     ===================================================================== */
+  var CFG = {
+    title: 'Fille d\u2019un ours',
+    startAt: null,        // timecode (secondes) où repartir au déblocage du son. null = on ne touche pas, le son
+                          // se synchronise avec l’image en cours (recommandé pour la continuité avec la pub).
+    // Noms des événements envoyés à GTM (un par bouton). Ils doivent être IDENTIQUES au « Nom de l’événement »
+    // de tes déclencheurs « Événement personnalisé » dans GTM. Change-les ici si tes déclencheurs portent d’autres noms.
+    events: { spotify: 'click_spotify', apple_music: 'click_apple_music' },
+    inAppNative: false,    // true = dans Instagram / Facebook, on tente d’ouvrir directement l’appli (spotify: / music:). Si tu vois une erreur de redirection là-bas,
+                          // mets false : le lien https normal est alors utilisé partout, sans tentative d’appli.
+    newTab: false,         // true = le lien s’ouvre dans un NOUVEL onglet (target="_blank") : la page reste ouverte, donc GA4 / Pixel ont tout le temps d’enregistrer
+                          // le clic. false = ancien comportement (même onglet, avec le délai redirectDelay).
+    ga4Direct: true,      // true (réglage actuel) = les événements vont directement à GA4, sans dépendre des balises GTM.
+                          // Garde alors tes balises d’événements GTM en pause, sinon chaque clic serait compté deux fois.
+    redirectDelay: 300,   // ms laissées au Pixel / GA4 avant de quitter la page (150–200). L’animation « + → crochet »
+                          // se termine en ~160 ms ; si tu veux la voir plus longtemps, monte à 400 (au prix d’un clic un peu plus lent).
+    listenMs: 10000,      // événement « écoute 10 s » une fois le son activé
+    spotify: {
+      android: 'intent://album/0K1JoEmz8r1vlkuZCuCazE#Intent;scheme=spotify;package=com.spotify.music;S.browser_fallback_url=',
+      ios: 'spotify:album:0K1JoEmz8r1vlkuZCuCazE'
+    }
+  };
+
+  /* =====================================================================
+     OUTILS : tracking (ne plante jamais si un script est bloqué)
+     ===================================================================== */
+  // Mode diagnostic : ouvre la page avec ?debug=1 puis la console (Cmd+Option+J) pour voir chaque envoi
+  var DEBUG = /[?&]debug\b/.test(location.search);
+  function log() { if (DEBUG && window.console) { console.log.apply(console, ['[PIERRO]'].concat([].slice.call(arguments))); } }
+
+  // A/B : paramètres ajoutés à CHAQUE événement (GA4, GTM et Meta Pixel)
+  var AB = window.__AB || {};
+  function withAB(p) {
+    var o = {}, k; p = p || {};
+    for (k in p) { if (Object.prototype.hasOwnProperty.call(p, k)) o[k] = p[k]; }
+    if (AB.test) { o.ab_test = AB.test; o.ab_variant = AB.variant; if (AB.forced) { o.ab_forced = 'yes'; } }
+    return o;
+  }
+  function fb(kind, name, params) {
+    try { window.fbq && window.fbq(kind, name, withAB(params)); log('Meta Pixel →', kind, name); } catch (e) {}
+  }
+  // Envoie un événement à : (1) GTM via le dataLayer, (2) GA4 en direct si CFG.ga4Direct = true.
+  // onDone (facultatif) est appelé quand GTM a terminé de déclencher ses balises pour cet événement.
+  function ga(name, params, onDone) {
+    params = withAB(params);
+    try {
+      var o = { event: name };
+      for (var k in params) { if (Object.prototype.hasOwnProperty.call(params, k)) o[k] = params[k]; }
+      if (onDone) { o.eventCallback = onDone; o.eventTimeout = 1500; }
+      (window.dataLayer = window.dataLayer || []).push(o);
+      log('dataLayer.push →', name, params, '| GTM chargé :', !!window.google_tag_manager);
+    } catch (e) { if (onDone) onDone(); }
+    if (CFG.ga4Direct) { try { window.gtag && window.gtag('event', name, params); log('gtag direct →', name); } catch (e) {} }
+  }
+
+  var ua = navigator.userAgent || '';
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var inMetaApp = /Instagram|FBAN|FBAV|FB_IAB|FBIOS/i.test(ua); // navigateur intégré Instagram / Facebook
+
+  /* =====================================================================
+     1) VUE DE CONTENU
+     ===================================================================== */
+  fb('track', 'ViewContent', { content_name: CFG.title, content_type: 'music', content_category: 'single' });
+  ga('page_ready', { content_name: CFG.title, in_app: inMetaApp ? 'meta' : 'no' });
+  ga('ab_exposure', { content_name: CFG.title });   // 1 fois par visite : « cette personne a vu la version A / B »
+
+  /* =====================================================================
+     2) SON : l’audio est déjà dans le MP4 (28 s en boucle).
+        a) on tente de lancer AVEC son dès le chargement ;
+        b) sinon la vidéo reste muette et le premier toucher débloque le son.
+     ===================================================================== */
+  var v = document.getElementById('bg');
+  var snd = document.getElementById('sound');
+  var sndTxt = document.getElementById('soundTxt');
+  var unlocked = false, userMuted = false, listenTimer = null;
+
+  function ui(state) {            // 'locked' | 'on' | 'muted'
+    snd.classList.toggle('is-hint', state === 'locked');
+    snd.classList.toggle('is-on', state === 'on');
+    snd.classList.toggle('is-muted', state === 'muted');
+    sndTxt.textContent = state === 'on' ? 'Son activé'
+                       : state === 'muted' ? 'Son coupé'
+                       : 'Tap n\u2019importe où pour le son';
+  }
+
+  function soundIsOn() { return !v.muted && !v.paused && v.volume > 0; }
+
+  function onUnlocked(method) {
+    if (unlocked) return;
+    unlocked = true;
+    ui('on');
+    removeGestureListeners();
+    fb('trackCustom', 'AudioUnlocked', { method: method });
+    ga('audio_start', { method: method, content_name: CFG.title });
+    // Événement d’engagement : l’utilisateur a réellement écouté ~10 s
+    listenTimer = setTimeout(function () {
+      if (soundIsOn()) {
+        fb('trackCustom', 'Listen10s', { content_name: CFG.title });
+        ga('listen_10s', { content_name: CFG.title });
+      }
+    }, CFG.listenMs);
+  }
+
+  function fallbackMuted() {      // le navigateur refuse le son : on garde au moins l’image
+    v.muted = true;
+    var p = v.play(); if (p && p.catch) p.catch(function () {});
+    ui('locked');
+  }
+
+  // a) Tentative automatique au chargement
+  function tryAutoSound() {
+    v.muted = false; v.volume = 1;
+    var p = v.play();
+    if (p && p.then) {
+      p.then(function () {
+        setTimeout(function () {   // certains navigateurs mettent en pause juste après
+          if (v.paused || v.muted) fallbackMuted(); else onUnlocked('autoplay');
+        }, 350);
+      }).catch(fallbackMuted);
+    }
+  }
+
+  // b) Premier geste : iOS / Chrome / webviews Meta ne comptent que certains événements comme
+  //    « activation » (touchend, pointerup, click). touchstart est écouté aussi, au cas où.
+  function unlockOnGesture(e) {
+    if (unlocked) return;
+    v.muted = false; v.volume = 1;
+    if (CFG.startAt !== null) { try { v.currentTime = CFG.startAt; } catch (err) {} }
+    var p = v.play();
+    var check = function () {
+      if (!v.muted && !v.paused) onUnlocked(e.type);   // sinon : on réessaiera au geste suivant
+    };
+    if (p && p.then) p.then(check).catch(function () { v.muted = true; }); else check();
+  }
+  var gestureEvents = ['touchstart', 'touchend', 'pointerup', 'click', 'keydown'];
+  function removeGestureListeners() {
+    gestureEvents.forEach(function (n) { window.removeEventListener(n, unlockOnGesture, true); });
+  }
+  gestureEvents.forEach(function (n) { window.addEventListener(n, unlockOnGesture, { capture: true, passive: true }); });
+
+  // Bouton d’indicateur : une fois le son débloqué, il sert d’interrupteur muet
+  snd.addEventListener('click', function () {
+    if (!unlocked) return;             // avant le déblocage, le geste global s’en charge
+    userMuted = !userMuted;
+    v.muted = userMuted;
+    ui(userMuted ? 'muted' : 'on');
+    ga('audio_toggle', { muted: userMuted });
+  });
+
+  // Reprise après retour sur l’onglet / depuis l’appli (la vidéo est mise en pause en arrière-plan)
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  });
+  if (v.readyState >= 2) tryAutoSound(); else v.addEventListener('loadeddata', tryAutoSound, { once: true });
+
+  /* =====================================================================
+     3) CLIC SUR LES PLATEFORMES : micro-interaction + tracking + délai + ouverture appli
+     ===================================================================== */
+  function openTarget(platform, webUrl) {
+    // Par défaut : le lien https (lien universel), qui ouvre l’appli quand l’OS le permet.
+    // Dans les navigateurs intégrés Instagram / Facebook, les liens universels sont souvent bloqués :
+    // on tente alors le schéma natif, avec repli automatique sur le lien https.
+    if (inMetaApp && CFG.inAppNative) {
+      if (platform === 'spotify' && isAndroid) {
+        location.href = CFG.spotify.android + encodeURIComponent(webUrl) + ';end';
+        return;
+      }
+      if (platform === 'spotify' && isIOS) { nativeThenWeb(CFG.spotify.ios, webUrl); return; }
+      if (platform === 'apple_music' && isIOS) { nativeThenWeb(webUrl.replace(/^https:\/\//, 'music://'), webUrl); return; }
+    }
+    location.href = webUrl;
+  }
+
+  function nativeThenWeb(nativeUrl, webUrl) {
+    var t = setTimeout(function () { if (!document.hidden) location.href = webUrl; }, 900);
+    document.addEventListener('visibilitychange', function () { clearTimeout(t); }, { once: true });
+    location.href = nativeUrl;
+  }
+
+  // Sécurité : dans le navigateur d’Instagram / Facebook, un target="_blank" provoque des erreurs de redirection : on le retire.
+  if (inMetaApp) {
+    [].forEach.call(document.querySelectorAll('a.cta'), function (c) { c.removeAttribute('target'); });
+  }
+
+  var busy = false;
+  function onCta(e) {
+    var a = e.currentTarget, platform = a.getAttribute('data-platform'), url = a.href;
+    // Dans les navigateurs Instagram / Facebook, on garde l’ouverture « appli native » (même onglet) ; sinon : nouvel onglet.
+    var wantsNative = CFG.inAppNative && inMetaApp && ((platform === 'spotify' && (isAndroid || isIOS)) || (platform === 'apple_music' && isIOS));
+    var newTab = CFG.newTab && !wantsNative && !inMetaApp;   // jamais de nouvel onglet dans le navigateur d’Instagram / Facebook
+    if (busy) { e.preventDefault(); return; }      // évite un double clic = deux onglets
+    if (!newTab) e.preventDefault();               // sinon le navigateur ouvre le lien (target=_blank) tout seul, immédiatement
+    busy = true;
+
+    // Micro-interaction : onde à l’endroit du toucher + icône + qui devient un crochet + petite vibration
+    var r = a.getBoundingClientRect();
+    a.style.setProperty('--px', (((e.clientX || r.left + r.width / 2) - r.left) / r.width * 100) + '%');
+    a.style.setProperty('--py', (((e.clientY || r.top + r.height / 2) - r.top) / r.height * 100) + '%');
+    a.classList.remove('is-pressed'); void a.offsetWidth; a.classList.add('is-pressed', 'is-saved');
+    if (navigator.vibrate) { try { navigator.vibrate(12); } catch (err) {} }
+
+    // Tracking : Meta Pixel (événement standard Lead + événement personnalisé) et GA4
+    var data = { content_name: CFG.title, platform: platform };
+    fb('track', 'Lead', data);
+    fb('trackCustom', platform === 'spotify' ? 'ClickSpotify' : 'ClickAppleMusic', data);
+    // Un événement par bouton, avec son propre nom : click_spotify  |  click_apple_music (pas besoin de variable dans GTM)
+    var delayDone = false, tagsDone = !(window.google_tag_manager) || newTab, went = false;
+    function tryGo() {
+      if (newTab || went || !delayDone || !tagsDone) return;
+      went = true; log('ouverture →', platform, url.slice(0, 60)); openTarget(platform, url);
+    }
+    ga(CFG.events[platform], {
+      cta_id: a.getAttribute('data-cta-id'),
+      cta_platform: platform,
+      cta_label: (a.querySelector('strong') || {}).textContent || '',
+      link_url: url,
+      content_name: CFG.title,
+      audio_on: soundIsOn()
+    }, newTab ? null : function () { tagsDone = true; tryGo(); });
+
+    // Même onglet : on part après redirectDelay ET après la fin des balises GTM (sécurité : 1,5 s max).
+    // Nouvel onglet : rien à faire, la page reste ouverte pendant que Spotify / Apple Music s’ouvre.
+    if (!newTab) {
+      setTimeout(function () { delayDone = true; tryGo(); }, CFG.redirectDelay);
+      setTimeout(function () { tagsDone = true; tryGo(); }, 1500);
+    } else { log('nouvel onglet (target=_blank) :', platform); }
+
+    // Si l’utilisateur revient sur la page (bouton retour), on remet les boutons à zéro
+    setTimeout(function () { busy = false; a.classList.remove('is-saved', 'is-pressed'); }, 2500);
+  }
+  ['cta-spotify', 'cta-apple-music'].forEach(function (id) {
+    document.getElementById(id).addEventListener('click', onCta);
+  });
+  // Page restaurée depuis le cache (retour arrière sur iOS) : état propre
+  window.addEventListener('pageshow', function (ev) {
+    if (ev.persisted) {
+      busy = false;
+      [].forEach.call(document.querySelectorAll('.cta'), function (c) { c.classList.remove('is-saved', 'is-pressed'); });
+      var p = v.play(); if (p && p.catch) p.catch(function () {});
+    }
+  });
+
+  /* =====================================================================
+     AJUSTEMENT AUTOMATIQUE : le titre (1 ou 2 lignes) et les textes des boutons s'adaptent si une copie est plus longue,
+     pour ne jamais déborder. Utile pour tester des copies de longueurs différentes.
+     ===================================================================== */
+  function fitOne(el, minPx) {
+    if (!el) return;
+    el.style.fontSize = '';
+    var size = parseFloat(getComputedStyle(el).fontSize), guard = 0;
+    while (el.scrollWidth > el.clientWidth + 1 && size > minPx && guard++ < 90) { size -= 1; el.style.fontSize = size + 'px'; }
+  }
+  // Titre : 1 ligne si possible (il peut rétrécir jusqu'à 80 %) ; si la copie est plus longue, il passe sur 2 lignes équilibrées
+  function fitHeadline(h) {
+    if (!h) return;
+    h.style.fontSize = ''; h.style.whiteSpace = ''; h.style.textWrap = '';
+    var base = parseFloat(getComputedStyle(h).fontSize), size = base, g = 0;
+    while (h.scrollWidth > h.clientWidth + 1 && size > base * 0.8 && g++ < 60) { size -= 1; h.style.fontSize = size + 'px'; }
+    if (h.scrollWidth > h.clientWidth + 1) {
+      h.style.whiteSpace = 'normal'; h.style.textWrap = 'balance'; size = base; h.style.fontSize = base + 'px'; g = 0;
+      while ((h.getBoundingClientRect().height / size > 2.2 || h.scrollWidth > h.clientWidth + 1) && size > 22 && g++ < 150) { size -= 1; h.style.fontSize = size + 'px'; }
+    }
+  }
+  function fitAll() {
+    fitHeadline(document.querySelector('.hero h1'));
+    [].forEach.call(document.querySelectorAll('.cta strong'), function (e) { fitOne(e, 12); });
+    [].forEach.call(document.querySelectorAll('.cta small'), function (e) { fitOne(e, 10); });
+  }
+  fitAll();
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitAll); }
+  window.addEventListener('load', fitAll);
+  var __fitT; window.addEventListener('resize', function () { clearTimeout(__fitT); __fitT = setTimeout(fitAll, 120); });
+})();
+</script>
+</body>
+</html>

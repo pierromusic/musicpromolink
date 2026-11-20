@@ -3,6 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- ============ A/B TEST : redirection 50/50 (doit rester le PREMIER script de la page) ============ -->
+<script>
+(function () {
+  /* ---------- RÉGLAGES DU TEST ---------- */
+  var AB = {
+    enabled: true,            // false = test arrêté : tout le monde voit la version A
+    test: 'copy_test_v1',     // nom du test, envoyé à GA4 (paramètre ab_test). Change-le pour relancer un nouveau test.
+    split: 0.5,               // part du trafic envoyée vers la version B (0.5 = 50 / 50)
+    control: './',            // adresse de la version A (cette page, dans index.html)
+    variant: 'variant-b.html',// adresse de la version B
+    days: 30                  // un visiteur garde la même version pendant 30 jours
+  };
+  var ROLE = 'control';      // 'control' dans index.html (version A), 'variant' dans variant-b.html (version B)
+
+  /* ---------- LOGIQUE (rien à modifier) ---------- */
+  var key = 'pierro_ab_' + AB.test, q = location.search;
+  var dir = location.pathname.replace(/[^\/]*$/, '') || '/';
+  function qp(n) { var m = new RegExp('[?&]' + n + '=([^&#]*)', 'i').exec(q); return m ? decodeURIComponent(m[1]) : null; }
+  function read() {
+    try { var v = localStorage.getItem(key); if (v) return v; } catch (e) {}
+    var m = document.cookie.match(new RegExp('(?:^|; )' + key + '=([^;]*)')); return m ? m[1] : null;
+  }
+  function write(v) {
+    try { localStorage.setItem(key, v); } catch (e) {}
+    try { document.cookie = key + '=' + v + '; max-age=' + (AB.days * 86400) + '; path=' + dir + '; SameSite=Lax'; } catch (e) {}
+  }
+  var force = qp('ab'), v = null, forced = false, persist = true;
+  if (force) {            // aperçu / test manuel : ?ab=A  ?ab=B  ?ab=off
+    force = force.toUpperCase();
+    if (force === 'A' || force === 'B') { v = force; forced = true; }
+    else if (force === 'OFF') { v = 'A'; forced = true; persist = false; }
+  }
+  var stored = read(); if (stored !== 'A' && stored !== 'B') stored = null;
+  if (!v) {
+    if (ROLE === 'variant') { v = 'B'; }                          // arrivé directement sur B : il voit B
+    else if (!AB.enabled) { v = 'A'; persist = false; }           // test arrêté
+    else { v = stored || (Math.random() < AB.split ? 'B' : 'A'); } // 1re visite : tirage au sort 50/50
+  }
+  if (persist && (forced || !stored)) write(v);
+
+  window.__AB = { test: AB.test, variant: v, forced: forced, role: ROLE };
+
+  var target = null;
+  if (ROLE === 'control' && v === 'B') target = AB.variant;
+  if (ROLE === 'variant' && v === 'A') target = AB.control;      // seulement avec ?ab=A (aperçu)
+  if (target) {
+    window.__abRedirecting = true;                               // bloque GTM / Pixel / GA4 sur cette page : la visite est comptée sur la bonne version
+    document.documentElement.style.visibility = 'hidden';        // évite un flash de la mauvaise version
+    var url = target + q + location.hash;                        // conserve utm_*, fbclid, etc.
+    try { location.replace(url); } catch (e) { location.href = url; }
+    setTimeout(function () { document.documentElement.style.visibility = ''; }, 3000); // sécurité si la redirection échoue
+  }
+})();
+</script>
 <title>PIERRO – Fille d’un ours | Nouveau single</title>
 <meta name="description" content="Fille d’un ours, le nouveau single de PIERRO. Écoute-le et sauvegarde-le sur Spotify ou Apple Music.">
 <meta name="theme-color" content="#121212">
@@ -26,10 +81,11 @@
 <link rel="preload" as="font" type="font/woff" href="daisy-regular.woff" crossorigin>
 
 <!-- ============ GOOGLE TAG MANAGER (GTM-P24GK2F8) ============ -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-P24GK2F8');</script>
+<script>if(!window.__abRedirecting)(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-P24GK2F8');</script>
 
 <!-- ============ META PIXEL ============ -->
 <script>
+if(!window.__abRedirecting){
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -40,21 +96,31 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '282532930990770');
 fbq('track', 'PageView');
+}
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=282532930990770&ev=PageView&noscript=1"
 /></noscript>
 
 <!-- ============ GOOGLE ANALYTICS 4 ============ -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-8H43J526WC"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-// Ajoute ?debug=1 à l'adresse de la page pour voir tes clics dans GA4 > DebugView (sans passer par l'aperçu GTM)
-var __ga4cfg = { transport_type: 'beacon' };
-if (/[?&]debug\b/.test(location.search)) { __ga4cfg.debug_mode = true; }
-gtag('config', 'G-8H43J526WC', __ga4cfg);
+if (!window.__abRedirecting) {
+  var __gs = document.createElement('script'); __gs.async = true;
+  __gs.src = 'https://www.googletagmanager.com/gtag/js?id=G-8H43J526WC';
+  document.head.appendChild(__gs);
+  gtag('js', new Date());
+  // Ajoute ?debug=1 à l'adresse de la page pour voir tes clics dans GA4 > DebugView (sans passer par l'aperçu GTM)
+  var __ga4cfg = { transport_type: 'beacon' };
+  if (/[?&]debug\b/.test(location.search)) { __ga4cfg.debug_mode = true; }
+  // A/B : chaque événement GA4 porte ab_test et ab_variant (à enregistrer comme dimensions personnalisées dans GA4)
+  if (window.__AB) {
+    __ga4cfg.ab_test = __AB.test; __ga4cfg.ab_variant = __AB.variant;
+    if (__AB.forced) { __ga4cfg.ab_forced = 'yes'; }
+  }
+  gtag('config', 'G-8H43J526WC', __ga4cfg);
+}
 </script>
 
 <style>
@@ -184,7 +250,7 @@ body{background:transparent}
 .cta .txt{display:flex;flex-direction:column;text-align:left;line-height:1.15;min-width:0}
 .cta .logo{width:30px;height:30px;display:block}
 .cta strong{font-size:clamp(.95rem,4.4vw,1.1rem);font-weight:800;letter-spacing:-.005em;white-space:nowrap}
-.cta small{font-size:.8rem;margin-top:.18rem;font-weight:500}
+.cta small{font-size:.8rem;margin-top:.18rem;font-weight:500;white-space:nowrap}
 
 .cta-spotify{background:var(--spotify);color:var(--charbon)}
 .cta-spotify small{opacity:.82}
@@ -314,6 +380,7 @@ body{background:transparent}
 <script>
 (function () {
   'use strict';
+  if (window.__abRedirecting) { return; }   // page en cours de redirection vers l'autre version : on ne compte rien ici
 
   /* =====================================================================
      CONFIGURATION : tout ce que tu peux vouloir modifier est ici
@@ -347,13 +414,21 @@ body{background:transparent}
   var DEBUG = /[?&]debug\b/.test(location.search);
   function log() { if (DEBUG && window.console) { console.log.apply(console, ['[PIERRO]'].concat([].slice.call(arguments))); } }
 
+  // A/B : paramètres ajoutés à CHAQUE événement (GA4, GTM et Meta Pixel)
+  var AB = window.__AB || {};
+  function withAB(p) {
+    var o = {}, k; p = p || {};
+    for (k in p) { if (Object.prototype.hasOwnProperty.call(p, k)) o[k] = p[k]; }
+    if (AB.test) { o.ab_test = AB.test; o.ab_variant = AB.variant; if (AB.forced) { o.ab_forced = 'yes'; } }
+    return o;
+  }
   function fb(kind, name, params) {
-    try { window.fbq && window.fbq(kind, name, params || {}); log('Meta Pixel →', kind, name); } catch (e) {}
+    try { window.fbq && window.fbq(kind, name, withAB(params)); log('Meta Pixel →', kind, name); } catch (e) {}
   }
   // Envoie un événement à : (1) GTM via le dataLayer, (2) GA4 en direct si CFG.ga4Direct = true.
   // onDone (facultatif) est appelé quand GTM a terminé de déclencher ses balises pour cet événement.
   function ga(name, params, onDone) {
-    params = params || {};
+    params = withAB(params);
     try {
       var o = { event: name };
       for (var k in params) { if (Object.prototype.hasOwnProperty.call(params, k)) o[k] = params[k]; }
@@ -374,6 +449,7 @@ body{background:transparent}
      ===================================================================== */
   fb('track', 'ViewContent', { content_name: CFG.title, content_type: 'music', content_category: 'single' });
   ga('page_ready', { content_name: CFG.title, in_app: inMetaApp ? 'meta' : 'no' });
+  ga('ab_exposure', { content_name: CFG.title });   // 1 fois par visite : « cette personne a vu la version A / B »
 
   /* =====================================================================
      2) SON : l’audio est déjà dans le MP4 (28 s en boucle).
@@ -550,6 +626,37 @@ body{background:transparent}
       var p = v.play(); if (p && p.catch) p.catch(function () {});
     }
   });
+
+  /* =====================================================================
+     AJUSTEMENT AUTOMATIQUE : le titre (1 ou 2 lignes) et les textes des boutons s'adaptent si une copie est plus longue,
+     pour ne jamais déborder. Utile pour tester des copies de longueurs différentes.
+     ===================================================================== */
+  function fitOne(el, minPx) {
+    if (!el) return;
+    el.style.fontSize = '';
+    var size = parseFloat(getComputedStyle(el).fontSize), guard = 0;
+    while (el.scrollWidth > el.clientWidth + 1 && size > minPx && guard++ < 90) { size -= 1; el.style.fontSize = size + 'px'; }
+  }
+  // Titre : 1 ligne si possible (il peut rétrécir jusqu'à 80 %) ; si la copie est plus longue, il passe sur 2 lignes équilibrées
+  function fitHeadline(h) {
+    if (!h) return;
+    h.style.fontSize = ''; h.style.whiteSpace = ''; h.style.textWrap = '';
+    var base = parseFloat(getComputedStyle(h).fontSize), size = base, g = 0;
+    while (h.scrollWidth > h.clientWidth + 1 && size > base * 0.8 && g++ < 60) { size -= 1; h.style.fontSize = size + 'px'; }
+    if (h.scrollWidth > h.clientWidth + 1) {
+      h.style.whiteSpace = 'normal'; h.style.textWrap = 'balance'; size = base; h.style.fontSize = base + 'px'; g = 0;
+      while ((h.getBoundingClientRect().height / size > 2.2 || h.scrollWidth > h.clientWidth + 1) && size > 22 && g++ < 150) { size -= 1; h.style.fontSize = size + 'px'; }
+    }
+  }
+  function fitAll() {
+    fitHeadline(document.querySelector('.hero h1'));
+    [].forEach.call(document.querySelectorAll('.cta strong'), function (e) { fitOne(e, 12); });
+    [].forEach.call(document.querySelectorAll('.cta small'), function (e) { fitOne(e, 10); });
+  }
+  fitAll();
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitAll); }
+  window.addEventListener('load', fitAll);
+  var __fitT; window.addEventListener('resize', function () { clearTimeout(__fitT); __fitT = setTimeout(fitAll, 120); });
 })();
 </script>
 </body>
